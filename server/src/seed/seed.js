@@ -8,6 +8,8 @@ import HeroSlide from "../models/HeroSlide.js";
 import Coupon from "../models/Coupon.js";
 import ShippingZone from "../models/ShippingZone.js";
 import Settings from "../models/Settings.js";
+import Order from "../models/Order.js";
+import StockMovement from "../models/StockMovement.js";
 import { ALGERIA_WILAYAS } from "../utils/wilayasAlgeria.js";
 
 dotenv.config();
@@ -30,8 +32,10 @@ const seedData = async () => {
       Coupon.deleteMany(),
       ShippingZone.deleteMany(),
       Settings.deleteMany(),
+      Order.deleteMany(),
+      StockMovement.deleteMany(),
     ]);
-    console.log("Cleared existing collections.");
+    console.log("Cleared all 10 existing collections.");
 
     // 1. Users
     const users = await User.create([
@@ -468,6 +472,157 @@ const seedData = async () => {
           "Compatibilité": "Tous feux dont induction",
         },
       },
+      {
+        name: {
+          fr: "Service de Table Porcelaine Fine Impériale 60 Pièces",
+          ar: "طقم مائدة بورسلان ملكي فاخر 60 قطعة بحواف ذهبية",
+        },
+        slug: "service-table-porcelaine-fine-imperiale-60-pieces",
+        description: {
+          fr: "Le chef-d'œuvre de la table Dari Belle. Porcelaine extra blanche translucide avec filets d'or incrustés à la main. Idéal pour les grandes réceptions, mariages et fêtes de l'Aïd.",
+          ar: "طقم العروس الأسطوري من البورسلان النقي شديد البياض والمزين بنقوش ذهبية فخمة. يشمل جميع صحون التقديم والمقبلات وحساء الشوربة لضيافة ملكية مشرفة.",
+        },
+        images: [
+          "https://images.unsplash.com/photo-1615865417491-9941019fbc00?w=800&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800&auto=format&fit=crop",
+        ],
+        category: categories[0]._id,
+        brand: brands[0]._id,
+        sku: "DB-PORC-60P-GOLD",
+        purchasePrice: 42000,
+        price: 68000,
+        salePrice: 59900,
+        stock: 4,
+        lowStockThreshold: 2,
+        tags: ["bestseller", "promo"],
+        isPublished: true,
+        soldCount: 19,
+        attributes: {
+          "Nombre de pièces": "60 pièces (12 personnes)",
+          "Matière": "Porcelaine Fine Bone China",
+          "Entretien": "Lavage doux recommandé",
+        },
+      },
+      {
+        name: {
+          fr: "Set 4 Verres à Eau en Cristal Cannelé Fumé",
+          ar: "طقم 4 كؤوس ماء وعصائر كريستال مضلع دخاني فاخر",
+        },
+        slug: "set-4-verres-cristal-cannele-fume",
+        description: {
+          fr: "Verres à pied contemporains aux reflets ambrés et fumés. Silhouette cannelée architecturale inspirée des années 70 revisitée pour sublimer vos boissons fraîches.",
+          ar: "أكواب تقديم عصرية بلمسات لونية دخانية ساحرة وتضليع عمودي أنيق يبرز نقاء المشروبات الباردة والعصائر الطازجة على مائدتك.",
+        },
+        images: [
+          "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=800&auto=format&fit=crop",
+        ],
+        category: categories[4]._id,
+        brand: brands[4]._id,
+        sku: "DB-CRIST-4P-FUM",
+        purchasePrice: 2200,
+        price: 3900,
+        salePrice: 3400,
+        stock: 28,
+        lowStockThreshold: 6,
+        tags: ["new"],
+        isPublished: true,
+        soldCount: 33,
+        attributes: {
+          "Contenance": "380 ml",
+          "Quantité": "Lot de 4 verres",
+          "Style": "Ribbed Glassware Scandinave",
+        },
+      },
+      {
+        name: {
+          fr: "Planche à Découper & Présentation en Bois d'Olivier Brut",
+          ar: "لوح تقطيع وتقديم فاخر من خشب الزيتون الطبيعي الأصيل",
+        },
+        slug: "planche-presentation-bois-olivier-brut",
+        description: {
+          fr: "Sculptée d'une seule pièce dans du bois d'olivier méditerranéen centenaire. Chaque planche est unique par ses veinures chaudes et son rebord naturel écorce.",
+          ar: "قطعة فنية فريدة منحوتة يدوياً من خشب الزيتون المتوسطي العريق. مثالية لتقديم الأجبان والمملحات والمقبلات الفاخرة لضيوفك.",
+        },
+        images: [
+          "https://images.unsplash.com/photo-1590736969955-71cc94801759?w=800&auto=format&fit=crop",
+        ],
+        category: categories[3]._id,
+        brand: brands[3]._id,
+        sku: "DB-WOOD-OLIV-BRUT",
+        purchasePrice: 2400,
+        price: 4500,
+        salePrice: null,
+        stock: 2, // Alerte stock faible
+        lowStockThreshold: 3,
+        tags: ["bestseller"],
+        isPublished: true,
+        soldCount: 41,
+        attributes: {
+          "Dimensions": "45 x 22 x 2.5 cm",
+          "Traitement": "Huile d'olive biologique alimentaire",
+          "Origine": "Artisanat méditerranéen",
+        },
+      },
+      {
+        name: {
+          fr: "Ménagère Noir Mat & Or Brossé 24 Pièces Moderne",
+          ar: "طقم ملاعق وسكاكين أسود مطفي مع ذهبي 24 قطعة مودرن",
+        },
+        slug: "menagere-noir-mat-or-brosse-24p",
+        description: {
+          fr: "Audacieuse alliance de l'acier noir titane et de l'or brossé satiné. Lignes graphiques modernes pour une table résolument contemporaine.",
+          ar: "مزيج جريء يجمع بين الأسود الملكي المطفي والذهب المصقول. طقم ملاعق عصري يمنح طاولتك لمسة مطاعم الـ 5 نجوم.",
+        },
+        images: [
+          "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800&auto=format&fit=crop",
+        ],
+        category: categories[2]._id,
+        brand: brands[0]._id,
+        sku: "DB-MENAG-24P-BLKGOLD",
+        purchasePrice: 6500,
+        price: 11900,
+        salePrice: 9900,
+        stock: 12,
+        lowStockThreshold: 3,
+        tags: ["new"],
+        isPublished: true,
+        soldCount: 18,
+        attributes: {
+          "Pièces": "6 fourchettes, 6 couteaux, 6 cuillères soupe, 6 cuillères café",
+          "Traitement": "PVD Titane inrayable",
+        },
+      },
+      {
+        name: {
+          fr: "Théière en Verre Résistant avec Infuseur Inox & Chauffe-Plat",
+          ar: "إبريق شاي زجاج حراري مع مصفاة إينوكس وقاعدة تسخين بالشمعة",
+        },
+        slug: "theiere-verre-infuseur-chauffe-plat",
+        description: {
+          fr: "Admirez l'infusion de votre thé à la menthe ou de vos tisanes. Verre haute température résistant à la flamme, filtre amovible en inox micro-perforé.",
+          ar: "إبريق شاي زجاجي أنيق لمشاهدة أوراق الشاي والنعناع تتفتح بجمال. مزود بقاعدة تسخين بالشمعة للحفاظ على دفء الشاي طوال السهرة.",
+        },
+        images: [
+          "https://images.unsplash.com/photo-1577937927133-66ef06acdf18?w=800&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop",
+        ],
+        category: categories[4]._id,
+        brand: brands[4]._id,
+        sku: "DB-THEI-1200ML-GLS",
+        purchasePrice: 2600,
+        price: 4600,
+        salePrice: 3900,
+        stock: 20,
+        lowStockThreshold: 4,
+        tags: ["new", "promo"],
+        isPublished: true,
+        soldCount: 31,
+        attributes: {
+          "Capacité": "1200 ml (1.2 Litre)",
+          "Accessoires": "Chauffe-plat bougie + filtre inox inclus",
+        },
+      },
     ]);
     console.log(`Created ${products.length} Products with rich descriptions & attributes.`);
 
@@ -517,6 +672,28 @@ const seedData = async () => {
         order: 2,
         isActive: true,
       },
+      {
+        image: {
+          desktop: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=1600&auto=format&fit=crop",
+          mobile: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800&auto=format&fit=crop",
+        },
+        title: {
+          fr: "Art de Vivre & Porcelaine de Luxe",
+          ar: "فن العيش الملكي وأرقى البورسلان لدارك",
+        },
+        subtitle: {
+          fr: "Des services de table conçus pour traverser les générations. Visitez notre showroom exclusif à Tiaret.",
+          ar: "تشكيلات حصرية منتقاة بعناية لتدوم طويلاً. شرفونا بزيارة صالة العرض الخاصة بنا في تيارت.",
+        },
+        badge: "DARI BELLE TIARET ✦",
+        ctaLabel: {
+          fr: "Découvrir la Porcelaine",
+          ar: "شاهد أطقم البورسلان",
+        },
+        ctaLink: "/catalog?category=services-de-table",
+        order: 3,
+        isActive: true,
+      },
     ]);
     console.log(`Created ${slides.length} Hero Slides.`);
 
@@ -538,17 +715,246 @@ const seedData = async () => {
         expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
         isActive: true,
       },
+      {
+        code: "RAMADAN2026",
+        type: "percent",
+        value: 15,
+        minOrder: 20000,
+        expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+        isActive: true,
+      },
+      {
+        code: "BIENVENUE",
+        type: "fixed",
+        value: 1000,
+        minOrder: 8000,
+        expiresAt: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000),
+        isActive: true,
+      },
     ]);
     console.log(`Created ${coupons.length} Discount Coupons.`);
 
-    console.log("==========================================");
-    console.log("  MONGODB ATLAS DATABASE SEEDED SUCCESSFULLY !  ");
-    console.log("==========================================");
-    console.log("Admin Superuser: admin@daribelle.com / admin123456");
-    console.log("Stock Manager:   stock@daribelle.com / stock123456");
-    console.log(`Total Products:  ${products.length}`);
-    console.log(`Total Categories:${categories.length}`);
-    console.log(`Total Wilayas:   ${zones.length}`);
+    // 9. Orders
+    const sampleOrders = [
+      {
+        orderNumber: "DB-ORD-2026-001",
+        items: [
+          {
+            product: products[0]._id,
+            name: products[0].name.fr,
+            image: products[0].images[0],
+            price: products[0].salePrice || products[0].price,
+            quantity: 1,
+            variantSku: products[0].sku,
+          },
+          {
+            product: products[4]._id,
+            name: products[4].name.fr,
+            image: products[4].images[0],
+            price: products[4].salePrice || products[4].price,
+            quantity: 2,
+            variantSku: products[4].sku,
+          },
+        ],
+        customer: {
+          name: "Karim Benali",
+          phone: "0661234567",
+          wilaya: "14 - Tiaret",
+          commune: "Tiaret",
+          address: "Cité Volani, Rue 12, N° 45",
+          note: "Appeler avant la livraison svp",
+        },
+        shippingFee: 400,
+        subtotal: (products[0].salePrice || products[0].price) + (products[4].salePrice || products[4].price) * 2,
+        discount: 0,
+        total: (products[0].salePrice || products[0].price) + (products[4].salePrice || products[4].price) * 2 + 400,
+        status: "delivered",
+        paymentMethod: "COD",
+        statusHistory: [
+          { status: "pending", note: "Commande passée en ligne", date: new Date(Date.now() - 5 * 24 * 3600 * 1000) },
+          { status: "confirmed", note: "Confirmée par téléphone", date: new Date(Date.now() - 4 * 24 * 3600 * 1000) },
+          { status: "shipped", note: "Expédiée par Yalidine Express", date: new Date(Date.now() - 3 * 24 * 3600 * 1000) },
+          { status: "delivered", note: "Livrée et encaissée avec succès", date: new Date(Date.now() - 1 * 24 * 3600 * 1000) },
+        ],
+      },
+      {
+        orderNumber: "DB-ORD-2026-002",
+        items: [
+          {
+            product: products[1]._id,
+            name: products[1].name.fr,
+            image: products[1].images[0],
+            price: products[1].salePrice || products[1].price,
+            quantity: 1,
+            variantSku: products[1].sku,
+          },
+        ],
+        customer: {
+          name: "Amina Mansouri",
+          phone: "0550987654",
+          wilaya: "16 - Alger",
+          commune: "Hydra",
+          address: "Résidence Les Pins, Bâtiment C, Apt 14",
+          note: "Livraison à domicile le matin",
+        },
+        shippingFee: 650,
+        subtotal: products[1].salePrice || products[1].price,
+        discount: 1500,
+        total: (products[1].salePrice || products[1].price) - 1500 + 650,
+        coupon: "TIARET2026",
+        status: "shipped",
+        paymentMethod: "COD",
+        statusHistory: [
+          { status: "pending", note: "Commande enregistrée", date: new Date(Date.now() - 2 * 24 * 3600 * 1000) },
+          { status: "confirmed", note: "Validée par le service client", date: new Date(Date.now() - 1 * 24 * 3600 * 1000) },
+          { status: "shipped", note: "Colis pris en charge par le livreur", date: new Date() },
+        ],
+      },
+      {
+        orderNumber: "DB-ORD-2026-003",
+        items: [
+          {
+            product: products[3]._id,
+            name: products[3].name.fr,
+            image: products[3].images[0],
+            price: products[3].salePrice || products[3].price,
+            quantity: 1,
+            variantSku: products[3].sku,
+          },
+        ],
+        customer: {
+          name: "Nadia Boukhalfa",
+          phone: "0770334455",
+          wilaya: "31 - Oran",
+          commune: "Bir El Djir",
+          address: "Boulevard Millenium 2, Résidence El Bahdja",
+          note: "Trousseau de mariée, emballage soigné svp",
+        },
+        shippingFee: 600,
+        subtotal: products[3].salePrice || products[3].price,
+        discount: 0,
+        total: (products[3].salePrice || products[3].price) + 600,
+        status: "confirmed",
+        paymentMethod: "COD",
+        statusHistory: [
+          { status: "pending", note: "Nouvelle commande", date: new Date(Date.now() - 12 * 3600 * 1000) },
+          { status: "confirmed", note: "Vérification disponibilité effectuée", date: new Date(Date.now() - 6 * 3600 * 1000) },
+        ],
+      },
+      {
+        orderNumber: "DB-ORD-2026-004",
+        items: [
+          {
+            product: products[5]._id,
+            name: products[5].name.fr,
+            image: products[5].images[0],
+            price: products[5].salePrice || products[5].price,
+            quantity: 2,
+            variantSku: products[5].sku,
+          },
+          {
+            product: products[6]._id,
+            name: products[6].name.fr,
+            image: products[6].images[0],
+            price: products[6].salePrice || products[6].price,
+            quantity: 1,
+            variantSku: products[6].sku,
+          },
+        ],
+        customer: {
+          name: "Sofiane Brahimi",
+          phone: "0670112233",
+          wilaya: "25 - Constantine",
+          commune: "Ali Mendjeli",
+          address: "UV 05, Îlot 18, Logement 22",
+          note: "",
+        },
+        shippingFee: 700,
+        subtotal: (products[5].salePrice || products[5].price) * 2 + (products[6].salePrice || products[6].price),
+        discount: 0,
+        total: (products[5].salePrice || products[5].price) * 2 + (products[6].salePrice || products[6].price) + 700,
+        status: "pending",
+        paymentMethod: "COD",
+        statusHistory: [
+          { status: "pending", note: "En attente de confirmation téléphonique", date: new Date() },
+        ],
+      },
+    ];
+
+    const orders = await Order.create(sampleOrders);
+    console.log(`Created ${orders.length} Sample Orders with complete status history.`);
+
+    // 10. Stock Movements
+    const stockMovements = [
+      {
+        product: products[0]._id,
+        type: "in",
+        quantity: 30,
+        reason: "Arrivage conteneur porcelaine Turquie",
+        reference: "BL-TURK-2026-01",
+        stockBefore: 0,
+        stockAfter: 30,
+        performedBy: users[0]._id,
+      },
+      {
+        product: products[0]._id,
+        type: "out",
+        quantity: 15,
+        reason: "Ventes cumulées boutique & commandes en ligne",
+        reference: "CMD-HISTORIQUE-01",
+        stockBefore: 30,
+        stockAfter: 15,
+        performedBy: users[1]._id,
+      },
+      {
+        product: products[1]._id,
+        type: "in",
+        quantity: 20,
+        reason: "Réception palettes cocottes fonte",
+        reference: "BL-KORKMAZ-442",
+        stockBefore: 0,
+        stockAfter: 20,
+        performedBy: users[0]._id,
+      },
+      {
+        product: products[3]._id,
+        type: "in",
+        quantity: 10,
+        reason: "Importation ménagères dorées prestige",
+        reference: "BL-GOLD-84P-09",
+        stockBefore: 0,
+        stockAfter: 10,
+        performedBy: users[0]._id,
+      },
+      {
+        product: products[10]._id,
+        type: "adjustment",
+        quantity: -3,
+        reason: "Ajustement inventaire physique (exposition showroom)",
+        reference: "INV-PHY-2026-03",
+        stockBefore: 5,
+        stockAfter: 2,
+        performedBy: users[1]._id,
+      },
+    ];
+
+    await StockMovement.create(stockMovements);
+    console.log(`Created ${stockMovements.length} Stock Movement audit records.`);
+
+    console.log("=================================================");
+    console.log("  ALL 10 MONGODB ATLAS COLLECTIONS SEEDED 100% !  ");
+    console.log("=================================================");
+    console.log("👤 Admin Superuser: admin@daribelle.com / admin123456");
+    console.log("👤 Stock Manager:   stock@daribelle.com / stock123456");
+    console.log(`📦 Products:        ${products.length}`);
+    console.log(`🏷️  Categories:      ${categories.length}`);
+    console.log(`✨ Brands:          ${brands.length}`);
+    console.log(`🚚 Wilayas Zones:   ${zones.length}`);
+    console.log(`🖼️  Hero Slides:     ${slides.length}`);
+    console.log(`🎟️  Coupons:         ${coupons.length}`);
+    console.log(`📋 Orders:          ${orders.length}`);
+    console.log(`📊 Stock Movements: ${stockMovements.length}`);
+    console.log("=================================================");
     process.exit(0);
   } catch (error) {
     console.error("Error seeding MongoDB Atlas database:", error);
