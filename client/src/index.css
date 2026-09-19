@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -7,7 +7,7 @@
     font-family: 'Cairo', sans-serif;
   }
   html[dir="ltr"] {
-    font-family: 'Jost', sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   }
   
   /* Smooth scrolling */
@@ -25,13 +25,13 @@
   border-radius: 50% 50% 0 0 / 25% 25% 0 0;
 }
 
-/* Luxury gold shimmer effect */
+/* Warm terracotta & amber subtle shimmer */
 .gold-shimmer {
   background: linear-gradient(
     90deg,
-    rgba(242, 168, 29, 0) 0%,
-    rgba(242, 168, 29, 0.4) 50%,
-    rgba(242, 168, 29, 0) 100%
+    rgba(212, 163, 115, 0) 0%,
+    rgba(212, 163, 115, 0.4) 50%,
+    rgba(212, 163, 115, 0) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2.5s infinite;
@@ -42,18 +42,18 @@
   100% { background-position: 200% 0; }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar matching warm theme */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #F5EFE6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D42A52;
+  background: #9E532B;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #b51f42;
+  background: #85401B;
 }

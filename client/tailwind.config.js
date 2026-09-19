@@ -1,26 +1,44 @@
-﻿/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
         brand: {
-          yellow: "#F2A81D",
-          teal: "#3FB8A8",
-          rose: "#D42A52",
-          crimson: "#D42A52",
-          navy: "#1B1F4A",
-          cream: "#FFFDF8",
-          gold: "#D4AF37",
-          darkNavy: "#121533",
-          lightTeal: "#EBF7F5",
-          lightYellow: "#FEF7E8",
-          lightRose: "#FAEAEE",
+          // Warm Terracotta & Cognac (Primary Accent from mockup)
+          terracotta: "#9E532B",
+          terracottaHover: "#85401B",
+          cognac: "#B86B35",
+
+          // Warm Sand & Beige (Cards & Containers from mockup)
+          sand: "#F5EFE6",
+          sandLight: "#FAF7F2",
+          sandDark: "#EDE6DB",
+
+          // Deep Charcoal & Warm Espresso (Typography & Dark Elements from mockup)
+          charcoal: "#1F1E1D",
+          taupe: "#7D7973",
+
+          // Soft Amber Gold (Rating Stars & Badges from mockup)
+          amberGold: "#D4A373",
+
+          // Backward-compatible Brand Aliases for all existing pages
+          rose: "#9E532B",
+          crimson: "#9E532B",
+          navy: "#1F1E1D",
+          darkNavy: "#141312",
+          cream: "#FAF7F2",
+          yellow: "#D4A373",
+          gold: "#D4A373",
+          teal: "#5A7365",
+          lightTeal: "#F0F5F2",
+          lightYellow: "#FBF3E8",
+          lightRose: "#F8EFE4",
         },
       },
       fontFamily: {
         serif: ['"Playfair Display"', "serif"],
-        sans: ['"Jost"', "sans-serif"],
+        sans: ['"Plus Jakarta Sans"', '"Jost"', "sans-serif"],
         arabic: ['"Cairo"', "sans-serif"],
         cursive: ['"Great Vibes"', "cursive"],
       },

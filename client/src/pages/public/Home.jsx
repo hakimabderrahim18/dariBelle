@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
 import { HeroSlider } from "../../components/home/HeroSlider";
 import { GuaranteeSection } from "../../components/home/GuaranteeSection";
@@ -19,10 +19,10 @@ export const Home = () => {
 
       <div className="space-y-0">
         <HeroSlider />
-        <GuaranteeSection />
         <CategoryShowcase />
         <FeaturedProducts />
         <BrandStory />
+        <GuaranteeSection />
       </div>
     </>
   );

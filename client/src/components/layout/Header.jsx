@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,6 +10,7 @@ import {
   X,
   User,
   Globe,
+  Heart,
 } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
 import { useUIStore } from "../../store/uiStore";
@@ -84,160 +85,137 @@ export const Header = () => {
         </div>
       </div>
 
-      {/* Main Bar */}
-      <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+      {/* Main Navigation Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-6">
         {/* Mobile menu trigger */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-2 text-brand-navy hover:text-brand-rose"
+          className="md:hidden p-2 text-brand-charcoal hover:text-brand-terracotta"
           aria-label="Menu"
         >
-          {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="relative w-11 h-11 bg-brand-rose rounded-xl flex items-center justify-center shadow-md shadow-brand-rose/25 group-hover:scale-105 transition-transform overflow-hidden">
-            {/* House / Arch silhouette */}
-            <div className="w-6 h-7 border-2 border-brand-yellow rounded-t-full flex items-center justify-center">
-              <span className="text-white font-serif font-black text-sm">DB</span>
-            </div>
-            <div className="absolute -bottom-2 -right-2 w-5 h-5 bg-brand-yellow rounded-full opacity-80" />
-          </div>
-
-          <div className="flex flex-col">
-            <span className="font-serif text-2xl font-bold tracking-tight text-brand-navy leading-none">
-              Dari <span className="text-brand-rose font-serif">Belle</span>
-            </span>
-            <span className="text-[9px] tracking-luxury uppercase font-bold text-brand-yellow font-sans mt-0.5">
-              {t("brand.sloganLuxury")}
-            </span>
-            <span className="text-[9px] text-gray-500 font-medium">Tiaret, Algérie</span>
-          </div>
+        {/* Brand Logo (Refined Serif Aesthetic) */}
+        <Link to="/" className="flex items-baseline gap-1.5 group">
+          <span className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-brand-charcoal group-hover:text-brand-terracotta transition-colors">
+            Dari&Belle
+          </span>
+          <span className="font-cursive text-brand-terracotta text-lg sm:text-xl font-normal">
+            Tiaret
+          </span>
         </Link>
 
-        {/* Search Bar (Desktop) */}
-        <form
-          onSubmit={handleSearch}
-          className="hidden md:flex flex-1 max-w-md mx-6 relative"
-        >
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("common.search")}
-            className="w-full bg-brand-cream border border-gray-200 rounded-full py-2.5 ps-10 pe-24 text-sm text-brand-navy focus:outline-none focus:border-brand-rose focus:ring-1 focus:ring-brand-rose transition-all shadow-inner"
-          />
-          <Search
-            size={18}
-            className="absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <button
-            type="submit"
-            className="absolute end-1.5 top-1/2 -translate-y-1/2 bg-brand-rose hover:bg-[#b81f42] text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
-          >
-            {i18n.language === "ar" ? "بحث" : "Chercher"}
-          </button>
-        </form>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
-          {/* Track order */}
+        {/* Center Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-brand-charcoal">
           <Link
-            to="/track-order"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-brand-navy hover:text-brand-rose p-2 rounded-lg transition-colors"
-            title={t("nav.trackOrder")}
+            to="/"
+            className="hover:text-brand-terracotta transition-colors relative py-1 border-b-2 border-brand-charcoal font-semibold"
           >
-            <Truck size={19} />
-            <span className="hidden lg:inline">{t("nav.trackOrder")}</span>
+            {t("nav.home")}
           </Link>
-
-          {/* Admin link */}
           <Link
-            to="/admin/login"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-brand-navy p-2 rounded-lg transition-colors"
-            title="Espace Gestionnaire"
+            to="/catalog"
+            className="hover:text-brand-terracotta transition-colors py-1 text-gray-600 hover:text-brand-charcoal"
           >
-            <User size={19} />
+            {t("nav.catalog")}
+          </Link>
+          <Link
+            to="/catalog?category=services-de-table"
+            className="hover:text-brand-terracotta transition-colors py-1 text-gray-600 hover:text-brand-charcoal"
+          >
+            {i18n.language === "ar" ? "المجموعات" : "Collections"}
+          </Link>
+          <Link
+            to="/about"
+            className="hover:text-brand-terracotta transition-colors py-1 text-gray-600 hover:text-brand-charcoal"
+          >
+            {t("nav.about")}
+          </Link>
+          <Link
+            to="/contact"
+            className="hover:text-brand-terracotta transition-colors py-1 text-gray-600 hover:text-brand-charcoal"
+          >
+            {t("nav.contact")}
+          </Link>
+        </nav>
+
+        {/* Right Action Icons & Shop Now Button */}
+        <div className="flex items-center gap-4 sm:gap-5">
+          {/* Search Bar / Trigger */}
+          <form onSubmit={handleSearch} className="hidden lg:flex items-center relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("common.search")}
+              className="bg-brand-sand/50 border border-gray-200 rounded-full py-1.5 ps-8 pe-3 text-xs text-brand-charcoal focus:outline-none focus:border-brand-terracotta w-36 focus:w-48 transition-all"
+            />
+            <Search size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </form>
+
+          {/* Wishlist / Favorites */}
+          <Link
+            to="/catalog?tag=bestseller"
+            className="text-brand-charcoal hover:text-brand-terracotta transition-colors p-1"
+            title="Coups de Cœur"
+          >
+            <Heart size={20} strokeWidth={1.8} />
           </Link>
 
           {/* Cart Trigger */}
           <button
             onClick={openCart}
-            className="relative flex items-center gap-2 bg-brand-rose text-white px-3.5 py-2 rounded-xl shadow-md hover:bg-[#b81f42] transition-all active:scale-95"
+            className="relative text-brand-charcoal hover:text-brand-terracotta transition-colors p-1"
             aria-label="Panier"
           >
-            <ShoppingBag size={20} />
-            <span className="hidden md:inline text-xs font-bold">
-              {t("cart.title")}
-            </span>
+            <ShoppingBag size={21} strokeWidth={1.8} />
             {itemsCount > 0 && (
-              <span className="absolute -top-1.5 -end-1.5 bg-brand-yellow text-brand-navy text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow">
+              <span className="absolute -top-1 -end-2 bg-brand-terracotta text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow">
                 {itemsCount}
               </span>
             )}
           </button>
+
+          {/* Prominent "Shop Now" / "Commander" Terracotta Button */}
+          <Link
+            to="/catalog"
+            className="hidden sm:inline-flex items-center justify-center bg-brand-terracotta hover:bg-brand-terracottaHover text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors tracking-wide"
+          >
+            {i18n.language === "ar" ? "تسوق الآن" : "Shop Now"}
+          </Link>
         </div>
       </div>
 
-      {/* Categories Navigation Bar (Desktop) */}
-      <nav className="hidden md:block bg-brand-cream/80 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-brand-navy">
-          <div className="flex items-center gap-6 py-2.5 overflow-x-auto scrollbar-none">
-            <Link to="/" className="hover:text-brand-rose transition-colors whitespace-nowrap">
-              {t("nav.home")}
+      {/* Sub-bar Category Pills for Quick Access */}
+      <div className="hidden lg:block bg-brand-sand/30 border-t border-gray-100/80 py-2">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[11px] font-medium text-gray-600">
+          <div className="flex items-center gap-6 overflow-x-auto scrollbar-none">
+            <Link to="/catalog?category=services-de-table" className="hover:text-brand-terracotta transition-colors">
+              {i18n.language === "ar" ? "أطقم المائدة والبورسلان" : "Services de Table & Porcelaine"}
             </Link>
-            <Link to="/catalog" className="hover:text-brand-rose transition-colors whitespace-nowrap">
-              {t("nav.catalog")}
+            <Link to="/catalog?category=marmites-et-casseroles" className="hover:text-brand-terracotta transition-colors">
+              {i18n.language === "ar" ? "القدور وطناجر الجرانيت" : "Marmites & Batteries de Cuisine"}
             </Link>
-            <Link
-              to="/catalog?category=services-de-table"
-              className="hover:text-brand-rose transition-colors whitespace-nowrap"
-            >
-              {i18n.language === "ar" ? "أطقم المائدة" : "Services de Table"}
+            <Link to="/catalog?category=menageres-et-couverts" className="hover:text-brand-terracotta transition-colors">
+              {i18n.language === "ar" ? "أطقم الملاعق والسكاكين" : "Ménagères & Couverts Dorés"}
             </Link>
-            <Link
-              to="/catalog?category=marmites-et-casseroles"
-              className="hover:text-brand-rose transition-colors whitespace-nowrap"
-            >
-              {i18n.language === "ar" ? "القدور والطناجر" : "Marmites & Faitouts"}
+            <Link to="/catalog?category=rangement-et-bocaux" className="hover:text-brand-terracotta transition-colors">
+              {i18n.language === "ar" ? "برطمانات وتنظيم المطبخ" : "Rangement & Bocaux"}
             </Link>
-            <Link
-              to="/catalog?category=menageres-et-couverts"
-              className="hover:text-brand-rose transition-colors whitespace-nowrap"
-            >
-              {i18n.language === "ar" ? "الملاعق والسكاكين" : "Ménagères Royales"}
+            <Link to="/catalog?category=verrerie-et-tasses" className="hover:text-brand-terracotta transition-colors">
+              {i18n.language === "ar" ? "كؤوس وأطقم الشاي" : "Verrerie & Thé"}
             </Link>
-            <Link
-              to="/catalog?category=verrerie-et-tasses"
-              className="hover:text-brand-rose transition-colors whitespace-nowrap"
-            >
-              {i18n.language === "ar" ? "كؤوس وشاي" : "Verrerie & Thé"}
-            </Link>
-            <Link
-              to="/catalog?category=petit-electromenager"
-              className="hover:text-brand-rose transition-colors whitespace-nowrap"
-            >
-              {i18n.language === "ar" ? "كهرومنزلية" : "Électroménager"}
+            <Link to="/catalog?category=decoration-et-mobilier" className="hover:text-brand-terracotta transition-colors">
+              {i18n.language === "ar" ? "ديكور وأثاث" : "Déco & Mobilier"}
             </Link>
           </div>
-
-          <div className="flex items-center gap-4 py-2 text-xs">
-            <Link
-              to="/about"
-              className="text-gray-500 hover:text-brand-navy transition-colors whitespace-nowrap"
-            >
-              {t("nav.about")}
-            </Link>
-            <Link
-              to="/contact"
-              className="text-brand-rose font-bold hover:underline whitespace-nowrap"
-            >
-              {t("nav.contact")}
-            </Link>
-          </div>
+          <Link to="/track-order" className="hover:text-brand-terracotta flex items-center gap-1 shrink-0">
+            <Truck size={13} />
+            <span>{t("nav.trackOrder")}</span>
+          </Link>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook, ShieldCheck, Heart } from "lucide-react";
@@ -10,7 +10,7 @@ export const Footer = () => {
   return (
     <footer className="relative bg-brand-navy text-white mt-16 pt-0">
       {/* Decorative Wave Divider at Top */}
-      <WaveDivider color="#1B1F4A" className="text-brand-navy -translate-y-[99%]" />
+      <WaveDivider color="#1F1E1D" className="text-brand-navy -translate-y-[99%]" />
 
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-16">
         {/* Main Footer Grid */}
