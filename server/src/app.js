@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -26,19 +26,30 @@ app.use(
 
 // CORS configuration
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:5173",
+  process.env.CLIENT_URL,
+  "https://client-beta-nine-75.vercel.app",
+  "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
-];
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps, curl, etc.)
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost:")) {
-        return callback(null, true);
+      // Allow requests with no origin (e.g. mobile apps, curl)
+      if (!origin) return callback(null, true);
+
+      // Check if matches allowedOrigins, localhost, or any vercel.app domain
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.startsWith("http://localhost:") ||
+        origin.endsWith(".vercel.app") ||
+        origin.includes("vercel.app")
+      ) {
+        return callback(null, origin); // Reflect requesting origin to allow credentials
       }
-      return callback(null, true); // Dev flexible
+
+      return callback(null, origin); // Permissive fallback
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
