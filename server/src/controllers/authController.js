@@ -26,7 +26,6 @@ export const login = async (req, res, next) => {
 
     const { accessToken, refreshToken } = generateTokens(user);
 
-    res.cookie("refreshToken", refreshToken, {
     const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("refreshToken", refreshToken, {
