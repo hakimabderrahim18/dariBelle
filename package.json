@@ -1,0 +1,13 @@
+{
+  "name": "dari-belle-root",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server/src/server.js",
+    "build": "cd server && npm install",
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "seed": "cd server && npm run seed"
+  }
+}
