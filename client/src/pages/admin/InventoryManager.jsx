@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   Boxes,
@@ -10,6 +10,9 @@ import {
   History,
   AlertTriangle,
   RefreshCw,
+  Check,
+  Filter,
+  Layers,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { api } from "../../api/endpoints";
@@ -18,6 +21,58 @@ import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 
+const EXPORT_ATTRIBUTE_GROUPS = [
+  {
+    title: "Identification & Références",
+    fields: [
+      { key: "sku", label: "SKU / Référence", description: "Identifiant article unique" },
+      { key: "nameFr", label: "Nom du Produit (FR)", description: "Désignation en français" },
+      { key: "nameAr", label: "Nom du Produit (AR)", description: "Désignation en arabe" },
+      { key: "category", label: "Catégorie", description: "Nom de la catégorie" },
+      { key: "brand", label: "Marque", description: "Marque ou fabricant" },
+      { key: "isPublished", label: "Statut Publié", description: "En ligne / Brouillon" },
+    ],
+  },
+  {
+    title: "Tarification & Ventes",
+    fields: [
+      { key: "purchasePrice", label: "Prix d'Achat (DZD)", description: "Coût de revient fournisseur" },
+      { key: "price", label: "Prix de Vente (DZD)", description: "Prix catalogue standard" },
+      { key: "salePrice", label: "Prix Promo (DZD)", description: "Prix promotionnel si actif" },
+      { key: "soldCount", label: "Total Ventes", description: "Nombre total d'unités vendues" },
+    ],
+  },
+  {
+    title: "Gestion des Stocks",
+    fields: [
+      { key: "stock", label: "Stock Actuel", description: "Quantité en rayon / showroom" },
+      { key: "lowStockThreshold", label: "Seuil d'Alerte", description: "Seuil déclencheur de réassort" },
+      { key: "stockStatus", label: "État du Stock", description: "En Stock / Faible / Rupture" },
+    ],
+  },
+  {
+    title: "Caractéristiques & Historique",
+    fields: [
+      { key: "tags", label: "Badges & Tags", description: "Nouveauté, Populaire, etc." },
+      { key: "attributes", label: "Attributs Techniques", description: "Matière, Pièces, Finition..." },
+      { key: "createdAt", label: "Date d'Ajout", description: "Date de création du produit" },
+    ],
+  },
+];
+
+const DEFAULT_EXPORT_FIELDS = [
+  "sku",
+  "nameFr",
+  "category",
+  "brand",
+  "purchasePrice",
+  "price",
+  "stock",
+  "stockStatus",
+];
+
+const ALL_EXPORT_FIELDS = EXPORT_ATTRIBUTE_GROUPS.flatMap((g) => g.fields.map((f) => f.key));
+
 export const InventoryManager = () => {
   const [inventory, setInventory] = useState(null);
   const [movements, setMovements] = useState([]);
@@ -25,6 +80,12 @@ export const InventoryManager = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [movementModalOpen, setMovementModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+
+  // Custom Excel Export state
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [selectedExportFields, setSelectedExportFields] = useState(DEFAULT_EXPORT_FIELDS);
+  const [exportStatusFilter, setExportStatusFilter] = useState("all");
+  const [isExporting, setIsExporting] = useState(false);
 
   // Movement form state
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -111,6 +172,60 @@ export const InventoryManager = () => {
     }
   };
 
+  const toggleExportField = (key) => {
+    setSelectedExportFields((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const handleSelectAllExportFields = () => {
+    setSelectedExportFields(ALL_EXPORT_FIELDS);
+  };
+
+  const handleDeselectAllExportFields = () => {
+    setSelectedExportFields([]);
+  };
+
+  const handleResetDefaultExportFields = () => {
+    setSelectedExportFields(DEFAULT_EXPORT_FIELDS);
+  };
+
+  const handleDownloadCustomExcel = async () => {
+    if (selectedExportFields.length === 0) {
+      toast.error("Veuillez sélectionner au moins une colonne à exporter.");
+      return;
+    }
+
+    setIsExporting(true);
+    const toastId = toast.loading("Génération du document Excel personnalisé...");
+    try {
+      const params = {
+        fields: selectedExportFields.join(","),
+        status: exportStatusFilter !== "all" ? exportStatusFilter : undefined,
+      };
+      const response = await api.exportInventoryBlob(params);
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const dateStr = new Date().toISOString().split("T")[0];
+      link.setAttribute("download", `inventaire-daribelle-${dateStr}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("Document Excel exporté avec succès !", { id: toastId });
+      setExportModalOpen(false);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Erreur lors de la génération du fichier Excel.", { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const summary = inventory?.summary || {};
   const products = inventory?.products || [];
 
@@ -128,7 +243,7 @@ export const InventoryManager = () => {
               Gestion des Stocks & Inventaire
             </h1>
             <p className="text-xs text-gray-500 mt-1">
-              Traçabilité des entrées/sorties fournisseurs, valorisation du stock et exports Excel.
+              Traçabilité des entrées/sorties fournisseurs, valorisation du stock et exports Excel personnalisables.
             </p>
           </div>
 
@@ -146,16 +261,16 @@ export const InventoryManager = () => {
               <span>Mouvement de Stock</span>
             </Button>
 
-            {/* Export Excel */}
-            <a
-              href={api.exportInventoryUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-colors"
+            {/* Export Excel (Customizable) */}
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setExportModalOpen(true)}
+              className="bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 font-bold"
             >
-              <FileSpreadsheet size={16} />
+              <FileSpreadsheet size={16} className="text-emerald-700" />
               <span>Exporter Excel (.xlsx)</span>
-            </a>
+            </Button>
 
             {/* Import CSV */}
             <Button
@@ -460,6 +575,156 @@ export const InventoryManager = () => {
             Lancer l'importation
           </Button>
         </form>
+      </Modal>
+
+      {/* Export Excel Customization Modal */}
+      <Modal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        title="Exporter l'Inventaire en Fichier Excel (.xlsx)"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-5 text-start">
+          {/* Informational Header */}
+          <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200/80 flex items-start gap-3">
+            <FileSpreadsheet className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+            <div className="text-xs text-emerald-950 space-y-1">
+              <p className="font-bold">Choix des attributs pour le document Excel</p>
+              <p className="text-emerald-800">
+                Sélectionnez les colonnes à inclure dans le fichier généré. Le fichier Excel comportera des en-têtes élégants et un code couleur selon l'état des stocks.
+              </p>
+            </div>
+          </div>
+
+          {/* Stock Filter Selector */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-navy mb-2">
+              Périmètre des articles à exporter :
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { value: "all", label: "Tous les articles" },
+                { value: "in-stock", label: "En stock uniquement" },
+                { value: "low-stock", label: "Stock faible & Rupture" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setExportStatusFilter(opt.value)}
+                  className={`py-2 px-3 text-xs rounded-xl font-medium border text-center transition-all ${
+                    exportStatusFilter === opt.value
+                      ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
+                      : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Bar for selection */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-2.5">
+            <div className="text-xs font-bold text-gray-700">
+              Colonnes sélectionnées :{" "}
+              <span className="text-emerald-700 font-mono">
+                {selectedExportFields.length} / {ALL_EXPORT_FIELDS.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <button
+                type="button"
+                onClick={handleSelectAllExportFields}
+                className="text-emerald-700 hover:underline font-semibold"
+              >
+                Tout cocher
+              </button>
+              <span className="text-gray-300">•</span>
+              <button
+                type="button"
+                onClick={handleResetDefaultExportFields}
+                className="text-gray-600 hover:underline font-semibold"
+              >
+                Par défaut
+              </button>
+              <span className="text-gray-300">•</span>
+              <button
+                type="button"
+                onClick={handleDeselectAllExportFields}
+                className="text-gray-500 hover:underline"
+              >
+                Tout décocher
+              </button>
+            </div>
+          </div>
+
+          {/* Categorized Attribute Checkboxes */}
+          <div className="max-h-[320px] overflow-y-auto pr-1 space-y-4">
+            {EXPORT_ATTRIBUTE_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-2">
+                <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  {group.title}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {group.fields.map((f) => {
+                    const isChecked = selectedExportFields.includes(f.key);
+                    return (
+                      <label
+                        key={f.key}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleExportField(f.key);
+                        }}
+                        className={`flex items-start gap-2.5 p-2.5 rounded-xl border cursor-pointer select-none transition-all ${
+                          isChecked
+                            ? "bg-emerald-50/60 border-emerald-300 shadow-xs"
+                            : "bg-white border-gray-200 hover:bg-gray-50 opacity-80"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}}
+                          className="mt-0.5 rounded text-emerald-700 focus:ring-emerald-500 accent-emerald-700"
+                        />
+                        <div className="text-xs">
+                          <p className={`font-semibold ${isChecked ? "text-emerald-950" : "text-gray-700"}`}>
+                            {f.label}
+                          </p>
+                          <p className="text-[11px] text-gray-400">{f.description}</p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Modal Actions */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t">
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              onClick={() => setExportModalOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={handleDownloadCustomExcel}
+              loading={isExporting}
+              disabled={selectedExportFields.length === 0}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold"
+            >
+              <FileSpreadsheet size={16} />
+              <span>Télécharger le Fichier (.xlsx)</span>
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );

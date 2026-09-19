@@ -1,4 +1,4 @@
-﻿import Product from "../models/Product.js";
+import Product from "../models/Product.js";
 import StockMovement from "../models/StockMovement.js";
 import { recordStockMovement } from "../services/stockService.js";
 import { exportInventoryToExcel, parseInventoryCsv } from "../services/excelInventoryService.js";
@@ -112,12 +112,24 @@ export const getStockMovements = async (req, res, next) => {
 
 export const exportInventoryExcel = async (req, res, next) => {
   try {
-    const products = await Product.find()
+    const { fields, status } = req.query;
+
+    let query = {};
+    if (status === "outOfStock") {
+      query.stock = { $lte: 0 };
+    } else if (status === "lowStock") {
+      query.$expr = { $lte: ["$stock", "$lowStockThreshold"] };
+      query.stock = { $gt: 0 };
+    } else if (status === "inStock") {
+      query.stock = { $gt: 0 };
+    }
+
+    const products = await Product.find(query)
       .populate("category", "name")
       .populate("brand", "name")
       .sort({ sku: 1 });
 
-    const buffer = await exportInventoryToExcel(products);
+    const buffer = await exportInventoryToExcel(products, fields);
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader(

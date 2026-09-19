@@ -1,4 +1,4 @@
-﻿import axiosInstance from "./axiosInstance";
+import axiosInstance from "./axiosInstance";
 
 export const api = {
   // Public
@@ -40,6 +40,11 @@ export const api = {
   addStockMovement: (data) => axiosInstance.post("/admin/inventory/movements", data),
   getStockMovements: (params) => axiosInstance.get("/admin/inventory/movements", { params }),
   exportInventoryUrl: `${axiosInstance.defaults.baseURL}/admin/inventory/export`,
+  exportInventoryBlob: (params) =>
+    axiosInstance.get("/admin/inventory/export", {
+      params,
+      responseType: "blob",
+    }),
   importInventoryCsv: (formData) =>
     axiosInstance.post("/admin/inventory/import", formData, {
       headers: { "Content-Type": "multipart/form-data" },

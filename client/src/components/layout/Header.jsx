@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
 import { useUIStore } from "../../store/uiStore";
+import { useAuthStore } from "../../store/authStore";
 
 export const Header = () => {
   const { t, i18n } = useTranslation();
@@ -23,6 +24,8 @@ export const Header = () => {
 
   const itemsCount = useCartStore((state) => state.getItemsCount());
   const openCart = useUIStore((state) => state.openCart);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "ar" ? "fr" : "ar";
@@ -81,6 +84,15 @@ export const Header = () => {
               <Globe size={13} />
               <span>{i18n.language === "ar" ? "Français" : "العربية"}</span>
             </button>
+
+            <Link
+              to={isAuthenticated ? "/admin/dashboard" : "/admin/login"}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/15 hover:bg-brand-terracotta text-white font-bold transition-all"
+              title="Espace Gestionnaire / Administration"
+            >
+              <User size={13} />
+              <span>{isAuthenticated ? "Admin" : "Espace Admin"}</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -161,6 +173,15 @@ export const Header = () => {
             title="Coups de Cœur"
           >
             <Heart size={20} strokeWidth={1.8} />
+          </Link>
+
+          {/* Espace Admin / User Account */}
+          <Link
+            to={isAuthenticated ? "/admin/dashboard" : "/admin/login"}
+            className="text-brand-charcoal hover:text-brand-terracotta transition-colors p-1 flex items-center gap-1"
+            title={isAuthenticated ? `Connecté: ${user?.name || "Admin"}` : "Espace Gestionnaire / Administration"}
+          >
+            <User size={20} strokeWidth={1.8} />
           </Link>
 
           {/* Cart Trigger */}
@@ -281,6 +302,14 @@ export const Header = () => {
               className="py-2 hover:text-brand-rose text-brand-rose font-bold"
             >
               {t("nav.contact")} (Tiaret)
+            </Link>
+            <Link
+              to={isAuthenticated ? "/admin/dashboard" : "/admin/login"}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="py-2.5 border-t border-gray-100 hover:text-brand-terracotta flex items-center gap-2 font-bold text-brand-terracotta mt-2"
+            >
+              <User size={18} />
+              <span>{isAuthenticated ? "Tableau de Bord Admin" : "Espace Admin / Connexion"}</span>
             </Link>
           </div>
         </div>

@@ -125,6 +125,11 @@ export const Footer = () => {
                   {t("nav.contact")}
                 </Link>
               </li>
+              <li className="pt-1 border-t border-white/10">
+                <Link to="/admin/login" className="text-[#D4A373] hover:underline font-semibold flex items-center gap-1.5">
+                  <span>🔐 Espace Administration</span>
+                </Link>
+              </li>
             </ul>
           </div>
 

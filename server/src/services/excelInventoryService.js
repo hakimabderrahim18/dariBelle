@@ -1,8 +1,53 @@
-﻿import ExcelJS from "exceljs";
+import ExcelJS from "exceljs";
 import { Readable } from "stream";
 import csvParser from "csv-parser";
 
-export const exportInventoryToExcel = async (products) => {
+// Complete catalog of exportable attributes with formatting
+export const EXPORT_ATTRIBUTES_MAP = {
+  sku: { header: "SKU / Référence", width: 18, getValue: (p) => p.sku || "" },
+  nameFr: { header: "Nom du Produit (FR)", width: 35, getValue: (p) => p.name?.fr || "" },
+  nameAr: { header: "Nom du Produit (AR)", width: 35, getValue: (p) => p.name?.ar || "" },
+  category: { header: "Catégorie", width: 24, getValue: (p) => p.category?.name?.fr || "Non catégorisé" },
+  brand: { header: "Marque", width: 20, getValue: (p) => p.brand?.name || "Sans marque" },
+  purchasePrice: { header: "Prix d'Achat (DZD)", width: 18, getValue: (p) => p.purchasePrice || 0 },
+  price: { header: "Prix Vente (DZD)", width: 18, getValue: (p) => p.price || 0 },
+  salePrice: { header: "Prix Promo (DZD)", width: 18, getValue: (p) => p.salePrice || "-" },
+  stock: { header: "Stock Actuel", width: 14, getValue: (p) => p.stock ?? 0 },
+  lowStockThreshold: { header: "Seuil Alerte", width: 14, getValue: (p) => p.lowStockThreshold ?? 5 },
+  stockStatus: {
+    header: "État du Stock",
+    width: 18,
+    getValue: (p) => (p.stock <= 0 ? "Rupture" : p.stock <= (p.lowStockThreshold || 5) ? "Stock Faible" : "En Stock"),
+  },
+  soldCount: { header: "Total Ventes", width: 14, getValue: (p) => p.soldCount || 0 },
+  isPublished: { header: "Publié", width: 12, getValue: (p) => (p.isPublished ? "Oui" : "Non") },
+  tags: {
+    header: "Tags / Badges",
+    width: 22,
+    getValue: (p) => (Array.isArray(p.tags) && p.tags.length ? p.tags.join(", ") : "-"),
+  },
+  attributes: {
+    header: "Attributs Techniques",
+    width: 45,
+    getValue: (p) => {
+      if (!p.attributes) return "-";
+      if (p.attributes instanceof Map) {
+        return Array.from(p.attributes.entries()).map(([k, v]) => `${k}: ${v}`).join(" | ");
+      }
+      if (typeof p.attributes === "object") {
+        return Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(" | ");
+      }
+      return "-";
+    },
+  },
+  createdAt: {
+    header: "Date d'Ajout",
+    width: 16,
+    getValue: (p) => (p.createdAt ? new Date(p.createdAt).toLocaleDateString("fr-FR") : "-"),
+  },
+};
+
+export const exportInventoryToExcel = async (products, selectedFieldKeys = null) => {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Dari Belle Management";
   workbook.created = new Date();
@@ -11,69 +56,68 @@ export const exportInventoryToExcel = async (products) => {
     views: [{ showGridLines: true }],
   });
 
-  worksheet.columns = [
-    { header: "SKU", key: "sku", width: 16 },
-    { header: "Nom du Produit (FR)", key: "nameFr", width: 35 },
-    { header: "Nom du Produit (AR)", key: "nameAr", width: 35 },
-    { header: "Catégorie", key: "category", width: 22 },
-    { header: "Marque", key: "brand", width: 18 },
-    { header: "Prix d'Achat (DZD)", key: "purchasePrice", width: 18 },
-    { header: "Prix Vente (DZD)", key: "price", width: 18 },
-    { header: "Prix Promo (DZD)", key: "salePrice", width: 18 },
-    { header: "Stock Actuel", key: "stock", width: 14 },
-    { header: "Seuil Alerte", key: "lowStockThreshold", width: 14 },
-    { header: "État Stock", key: "stockStatus", width: 16 },
-    { header: "Total Vendu", key: "soldCount", width: 14 },
-    { header: "Publié", key: "isPublished", width: 12 },
-  ];
+  // Determine active columns based on user selection
+  const allKeys = Object.keys(EXPORT_ATTRIBUTES_MAP);
+  let activeKeys = allKeys;
 
-  // Header styling
+  if (selectedFieldKeys) {
+    let keysArray = selectedFieldKeys;
+    if (typeof selectedFieldKeys === "string") {
+      keysArray = selectedFieldKeys.split(",").map((s) => s.trim());
+    }
+    if (Array.isArray(keysArray) && keysArray.length > 0) {
+      const filtered = keysArray.filter((k) => allKeys.includes(k));
+      if (filtered.length > 0) {
+        activeKeys = filtered;
+      }
+    }
+  }
+
+  worksheet.columns = activeKeys.map((key) => ({
+    header: EXPORT_ATTRIBUTES_MAP[key].header,
+    key,
+    width: EXPORT_ATTRIBUTES_MAP[key].width,
+  }));
+
+  // Header styling with warm luxury terracotta
   worksheet.getRow(1).eachCell((cell) => {
     cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
     cell.fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "FF1B1F4A" }, // Navy
+      fgColor: { argb: "FF9E532B" }, // Terracotta
     };
     cell.alignment = { vertical: "middle", horizontal: "center" };
   });
-  worksheet.getRow(1).height = 28;
+  worksheet.getRow(1).height = 30;
 
   products.forEach((p) => {
-    const isOutOfStock = p.stock <= 0;
-    const isLowStock = p.stock <= p.lowStockThreshold && p.stock > 0;
-    const stockStatus = isOutOfStock ? "Rupture" : isLowStock ? "Stock Faible" : "En Stock";
-
-    const row = worksheet.addRow({
-      sku: p.sku,
-      nameFr: p.name?.fr || "",
-      nameAr: p.name?.ar || "",
-      category: p.category?.name?.fr || "Non catégorisé",
-      brand: p.brand?.name || "Sans marque",
-      purchasePrice: p.purchasePrice || 0,
-      price: p.price,
-      salePrice: p.salePrice || "-",
-      stock: p.stock,
-      lowStockThreshold: p.lowStockThreshold,
-      stockStatus,
-      soldCount: p.soldCount || 0,
-      isPublished: p.isPublished ? "Oui" : "Non",
+    const rowData = {};
+    activeKeys.forEach((key) => {
+      rowData[key] = EXPORT_ATTRIBUTES_MAP[key].getValue(p);
     });
 
-    if (isOutOfStock) {
-      row.getCell("stockStatus").fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFFFD2D2" },
-      };
-      row.getCell("stockStatus").font = { color: { argb: "FF900000" }, bold: true };
-    } else if (isLowStock) {
-      row.getCell("stockStatus").fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFFFF3CD" },
-      };
-      row.getCell("stockStatus").font = { color: { argb: "FF856404" }, bold: true };
+    const row = worksheet.addRow(rowData);
+
+    // Conditional styling for stockStatus column if included
+    if (activeKeys.includes("stockStatus")) {
+      const isOutOfStock = p.stock <= 0;
+      const isLowStock = p.stock <= (p.lowStockThreshold || 5) && p.stock > 0;
+      if (isOutOfStock) {
+        row.getCell("stockStatus").fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFFFD2D2" },
+        };
+        row.getCell("stockStatus").font = { color: { argb: "FF900000" }, bold: true };
+      } else if (isLowStock) {
+        row.getCell("stockStatus").fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFFFF3CD" },
+        };
+        row.getCell("stockStatus").font = { color: { argb: "FF856404" }, bold: true };
+      }
     }
   });
 
