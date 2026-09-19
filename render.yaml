@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: daribelle-api
+    name: daribelle
     env: node
     plan: free
     rootDir: server

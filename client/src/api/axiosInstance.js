@@ -1,8 +1,33 @@
-﻿import axios from "axios";
+import axios from "axios";
 import { useAuthStore } from "../store/authStore";
 
+// Robust dynamic resolver for API base URL with auto-healing
+export const getApiBaseUrl = () => {
+  let url = import.meta.env.VITE_API_URL || "";
+
+  // If in browser and deployed (e.g. *.vercel.app)
+  if (typeof window !== "undefined") {
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (!isLocal && (!url || url.includes("localhost"))) {
+      url = "https://daribelle.onrender.com/api/v1";
+    }
+  }
+
+  // Fallback default
+  if (!url) {
+    url = "https://daribelle.onrender.com/api/v1";
+  }
+
+  // Self-heal: automatically fix daribelle-api.onrender.com -> daribelle.onrender.com
+  if (url.includes("daribelle-api.onrender.com")) {
+    url = url.replace("daribelle-api.onrender.com", "daribelle.onrender.com");
+  }
+
+  return url.replace(/\/+$/, "");
+};
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1",
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -11,6 +36,9 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
+    if (config.baseURL && config.baseURL.includes("daribelle-api.onrender.com")) {
+      config.baseURL = config.baseURL.replace("daribelle-api.onrender.com", "daribelle.onrender.com");
+    }
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -32,7 +60,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1"}/auth/refresh`,
+          `${getApiBaseUrl()}/auth/refresh`,
           {},
           { withCredentials: true }
         );
