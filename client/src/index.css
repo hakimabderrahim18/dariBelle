@@ -1,0 +1,59 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html[dir="rtl"] {
+    font-family: 'Cairo', sans-serif;
+  }
+  html[dir="ltr"] {
+    font-family: 'Jost', sans-serif;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom house-shape clip path inspired by Dari Belle logo */
+.clip-house {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0% 100%, 0% 25%);
+}
+
+.clip-arch {
+  border-radius: 50% 50% 0 0 / 25% 25% 0 0;
+}
+
+/* Luxury gold shimmer effect */
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(242, 168, 29, 0) 0%,
+    rgba(242, 168, 29, 0.4) 50%,
+    rgba(242, 168, 29, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #D42A52;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b51f42;
+}
