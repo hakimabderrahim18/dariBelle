@@ -1,4 +1,4 @@
-﻿import User from "../models/User.js";
+import User from "../models/User.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
@@ -27,16 +27,19 @@ export const login = async (req, res, next) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     res.cookie("refreshToken", refreshToken, {
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 15 * 60 * 1000, // 15 mins
     });
 
@@ -72,11 +75,12 @@ export const refreshToken = async (req, res, next) => {
     }
 
     const tokens = generateTokens(user);
+    const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("accessToken", tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 15 * 60 * 1000,
     });
 
@@ -89,8 +93,14 @@ export const refreshToken = async (req, res, next) => {
 };
 
 export const logout = async (req, res) => {
-  res.clearCookie("refreshToken");
-  res.clearCookie("accessToken");
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieOpts = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+  };
+  res.clearCookie("refreshToken", cookieOpts);
+  res.clearCookie("accessToken", cookieOpts);
   return sendSuccess(res, 200, "Déconnexion réussie.");
 };
 
